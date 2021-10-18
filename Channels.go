@@ -152,23 +152,23 @@ for range loops with channels
 select statement
 
 
- */
-var wg3=sync.WaitGroup{}//use for synchronize(we use channel and waitgroup for synchronize)
+*/
+var wg3 = sync.WaitGroup{} //use for synchronize(we use channel and waitgroup for synchronize)
 
 const (
-	logInfo = "INFO"
-	logWarning="WARNING"
-	logERROR="ERROR"
+	logInfo    = "INFO"
+	logWarning = "WARNING"
+	logERROR   = "ERROR"
 )
 
 type logEntry struct {
-	time time.Time
+	time     time.Time
 	severity string
-	message string
+	message  string
 }
 
-var logCh = make(chan logEntry,50)
-var doneCh = make(chan struct{})//add an addition channel 使用struct with no field
+var logCh = make(chan logEntry, 50)
+var doneCh = make(chan struct{}) //add an addition channel 使用struct with no field
 //struct with no field in go is unque that it requires zero memory allocations
 //a channel setup like this,the intention is it can send any data though
 //-except for the face that a message was sent or received
@@ -189,20 +189,20 @@ var doneCh = make(chan struct{})//add an addition channel 使用struct with no f
 	-we should have a strategy for how our go rouutine is going to shut down when we create
 	-our go routines
 
- */
-func logger()  {
+*/
+func logger() {
 	for {
 		select {
 		//整个语句将会block until a message is received on one of the channels that it's
-			//-listening for
-			//in this case:we are listening case for messages from logCh and
-			//-listening for message from the doneCh.
-			//-if we get messages from logCh we print.
-			//-if we get messages from doneCh we break from the loop
-			//This allow us:at the end of the application we can go ahead and pass in a
-			//-message into our doneCh
-		case entry:=<-logCh:
-			fmt.Printf("%v-[%v]%v\n",entry.time.Format("2006-01-02T15:04:05"),entry.severity,entry.message)
+		//-listening for
+		//in this case:we are listening case for messages from logCh and
+		//-listening for message from the doneCh.
+		//-if we get messages from logCh we print.
+		//-if we get messages from doneCh we break from the loop
+		//This allow us:at the end of the application we can go ahead and pass in a
+		//-message into our doneCh
+		case entry := <-logCh:
+			fmt.Printf("%v-[%v]%v\n", entry.time.Format("2006-01-02T15:04:05"), entry.severity, entry.message)
 		case <-doneCh:
 			break
 		}
@@ -210,16 +210,16 @@ func logger()  {
 	}
 }
 
-func main() {
+func main16() {
 	go logger()
 	/*defer func() {//当主函数结束时可以关闭channel
 		close(logCh)
 	}()*/
 
-	logCh<-logEntry{time.Now(),logInfo,"APP is starting"}
+	logCh <- logEntry{time.Now(), logInfo, "APP is starting"}
 
-	logCh<-logEntry{time.Now(),logInfo,"APP is shutting down"}
-	time.Sleep(100*time.Millisecond)
-	doneCh<- struct{}{}//This allow us:at the end of the application we can go ahead and pass in a
+	logCh <- logEntry{time.Now(), logInfo, "APP is shutting down"}
+	time.Sleep(100 * time.Millisecond)
+	doneCh <- struct{}{} //This allow us:at the end of the application we can go ahead and pass in a
 	//-message into our doneCh
 }
